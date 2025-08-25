@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../apps/api/node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Plot {
+  id              String   @id @default(cuid())
+  farmerId        String
+  name            String
+  boundaryGeojson Json     // keep simple; PostGIS can be added later
+  agroEcozone     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  trees           Tree[]
+  Run             Run[]
+}
+
+model Tree {
+  id           String   @id @default(cuid())
+  plotId       String
+  speciesCode  String?
+  heightM      Float?
+  crownAreaM2  Float?
+  dbhCm        Float?
+  health       String?
+  sourceRunId  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  plot         Plot     @relation(fields: [plotId], references: [id])
+}
+
+model Run {
+  id           String   @id @default(cuid())
+  plotId       String
+  modelVersion String
+  paramsHash   String
+  outputsUri   String?
+  ci95Low      Float?
+  ci95High     Float?
+  createdAt    DateTime @default(now())
+
+  plot         Plot     @relation(fields: [plotId], references: [id])
+  BiomassSummary BiomassSummary?
+  MRVPackage     MRVPackage?
+}
+
+model BiomassSummary {
+  id         String @id @default(cuid())
+  runId      String @unique
+  agbTHa     Float?
+  bgbTHa     Float?
+  carbonTHa  Float?
+  uncPct     Float?
+
+  run        Run    @relation(fields: [runId], references: [id])
+}
+
+model MRVPackage {
+  id           String   @id @default(cuid())
+  runId        String   @unique
+  schemaVersion String
+  artifactsUri String
+  checksum     String
+  ledgerTxId   String?
+  createdAt    DateTime @default(now())
+
+  run          Run      @relation(fields: [runId], references: [id])
+}
