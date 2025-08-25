@@ -5,9 +5,15 @@ import Link from 'next/link';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
     setMounted(true);
+    // Check for token in localStorage (simple auth check)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+    }
   }, []);
 
   if (!mounted) {
@@ -48,12 +54,14 @@ export default function Home() {
             >
               🚀 Get Started
             </Link>
-            <Link
-              href="/register"
-              className="bg-white/80 backdrop-blur-sm hover:bg-white text-gray-700 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-gray-200"
-            >
-              📝 Register
-            </Link>
+            {!isLoggedIn && (
+              <Link
+                href="/register"
+                className="bg-white/80 backdrop-blur-sm hover:bg-white text-gray-700 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-gray-200"
+              >
+                📝 Register
+              </Link>
+            )}
             <Link
               href="/blockchain"
               className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
